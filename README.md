@@ -2,8 +2,6 @@
 
 > Interactive mobile-first quiz that matches your mood to a perfect coffee drink — built with FastAPI, async SQLAlchemy, and procedural generation.
 
-![Project Screenshot](preview.png)
-
 ---
 
 ## 🎯 About The Project
