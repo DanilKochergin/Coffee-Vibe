@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Кофейный Квест</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                    },
+                    colors: {
+                        concrete: {
+                            50: '#f7f5f3',
+                            100: '#ede9e5',
+                            200: '#d9d3cc',
+                            300: '#c2b9ae',
+                            400: '#a89d90',
+                            500: '#938777',
+                            600: '#7a7064',
+                            700: '#635a50',
+                            800: '#534b44',
+                            900: '#48433c',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-out': 'fadeOut 0.3s ease-in forwards',
+                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'float': 'float 3s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-24px); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes cupDraw {
+            0% { stroke-dashoffset: 600; opacity: 0; }
+            30% { opacity: 1; }
+            100% { stroke-dashoffset: 0; opacity: 1; }
+        }
+        @keyframes steamRise {
+            0% { opacity: 0; transform: translateY(0) scaleX(1); }
+            30% { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(-20px) scaleX(1.3); }
+        }
+        .hidden { display: none !important; }
+        body {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .cup-svg path,
+        .cup-svg line {
+            stroke-dasharray: 600;
+            stroke-dashoffset: 600;
+            animation: cupDraw 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .cup-svg .delay-1 { animation-delay: 0.2s; }
+        .cup-svg .delay-2 { animation-delay: 0.4s; }
+        .cup-svg .delay-3 { animation-delay: 0.6s; }
+        .cup-svg .delay-4 { animation-delay: 0.8s; }
+        .cup-svg .delay-5 { animation-delay: 1.0s; }
+        .steam-line {
+            animation: steamRise 2.2s ease-out infinite;
+        }
+        .steam-line:nth-child(2) { animation-delay: 0.4s; }
+        .steam-line:nth-child(3) { animation-delay: 0.8s; }
+        .btn-start {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-start:active {
+            transform: scale(0.97);
+        }
+        .result-card {
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.2);
+        }
+        .emoji-badge {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+        #result-card-inner {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark-mode #result-card-inner {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar { width: 0; }
+    </style>
+</head>
+
+<body class="font-sans min-h-screen">
+
+    <!-- ============================================ -->
+    <!-- ЭКРАН 0: WELCOME / LANDING                   -->
+    <!-- ============================================ -->
+    <div id="welcome-screen"
+         class="min-h-screen bg-concrete-50 flex flex-col items-center justify-center px-6 relative overflow-hidden">
+
+        <!-- Мягкий градиент сверху -->
+        <div class="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-transparent pointer-events-none"></div>
+
+        <!-- Центральный блок -->
+        <div class="flex flex-col items-center z-10 animate-fade-in">
+
+            <!-- SVG иллюстрация: чашка кофе с зёрнами -->
+            <div class="mb-8 relative" style="animation: float 3s ease-in-out infinite;">
+                <!-- Пар над чашкой -->
+                <svg class="absolute -top-4 left-1/2 -translate-x-1/2 w-14 h-6 opacity-0" style="animation: fadeIn 1s 1.2s forwards;">
+                    <path class="steam-line" d="M10 24 Q13 17 10 10" stroke="#a89d90" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+                    <path class="steam-line" d="M22 24 Q19 15 22 8" stroke="#a89d90" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.4"/>
+                    <path class="steam-line" d="M34 24 Q37 17 34 10" stroke="#a89d90" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.3"/>
+                </svg>
+
+                <!-- Чашка кофе + 3 зерна -->
+                <svg class="cup-svg w-28 h-24" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Чашка: тело (округлое, как керамическая) -->
+                    <path d="M20 30 Q20 85 65 85 Q110 85 110 30" stroke="#534b44" stroke-width="2.5" stroke-linecap="round" fill="none" class="delay-3"/>
+                    <!-- Чашка: верхний край (овал) -->
+                    <ellipse cx="65" cy="30" rx="45" ry="10" stroke="#534b44" stroke-width="2.5" fill="none" class="delay-2"/>
+                    <!-- Ручка справа -->
+                    <path d="M110 38 Q130 38 130 55 Q130 72 110 72" stroke="#534b44" stroke-width="2.5" stroke-linecap="round" fill="none" class="delay-4"/>
+                    <!-- Уровень кофе внутри (тонкая дуга) -->
+                    <path d="M30 38 Q65 48 100 38" stroke="#c2b9ae" stroke-width="1.5" stroke-linecap="round" fill="none" class="delay-5" opacity="0.6"/>
+                    <!-- Блюдце (тонкая линия снизу) -->
+                    <ellipse cx="65" cy="88" rx="52" ry="7" stroke="#534b44" stroke-width="2" fill="none" class="delay-5"/>
+
+                    <!-- Зерно 1 (левое, крупное) -->
+                    <g transform="translate(8, 68) rotate(-20)">
+                        <ellipse cx="0" cy="0" rx="7" ry="11" stroke="#534b44" stroke-width="1.8" fill="none" class="delay-4"/>
+                        <path d="M0 -8 Q2 0 0 8" stroke="#534b44" stroke-width="1" fill="none" class="delay-5"/>
+                    </g>
+                    <!-- Зерно 2 (среднее, правее) -->
+                    <g transform="translate(22, 72) rotate(10)">
+                        <ellipse cx="0" cy="0" rx="6" ry="9" stroke="#534b44" stroke-width="1.6" fill="none" class="delay-4"/>
+                        <path d="M0 -6 Q1.5 0 0 6" stroke="#534b44" stroke-width="0.9" fill="none" class="delay-5"/>
+                    </g>
+                    <!-- Зерно 3 (правое, маленькое) -->
+                    <g transform="translate(34, 66) rotate(-35)">
+                        <ellipse cx="0" cy="0" rx="5" ry="8" stroke="#534b44" stroke-width="1.5" fill="none" class="delay-4"/>
+                        <path d="M0 -5 Q1.2 0 0 5" stroke="#534b44" stroke-width="0.8" fill="none" class="delay-5"/>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Название "ВАЙБ" -->
+            <h1 class="text-6xl font-black tracking-tight text-concrete-900 mb-2 animate-fade-in" style="animation-delay: 0.3s; text-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                ВАЙБ
+            </h1>
+
+            <!-- Подзаголовок -->
+            <p class="text-lg font-medium text-concrete-600 mb-12 tracking-wide animate-fade-in" style="animation-delay: 0.5s;">
+                Узнай настроение своего кофе
+            </p>
+
+            <!-- Кнопка -->
+            <button id="btn-start"
+                    class="btn-start px-10 py-4 bg-concrete-900 text-white font-medium text-sm tracking-wide rounded-full animate-fade-in hover:bg-concrete-800"
+                    style="animation-delay: 0.7s;">
+                Узнать свой вайб
+            </button>
+        </div>
+
+        <!-- Лого внизу -->
+        <div class="absolute bottom-8 text-xs font-light text-concrete-300 tracking-widest animate-fade-in" style="animation-delay: 1s;">
+            COFFEE QUEST
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ЭКРАН 1: КВЕСТ (ВОПРОСЫ)                    -->
+    <!-- ============================================ -->
+    <div id="quest-screen" class="hidden min-h-screen flex flex-col bg-concrete-50">
+
+        <!-- Прогресс-бар -->
+        <div class="fixed top-0 left-0 right-0 z-50">
+            <div class="h-[3px] bg-concrete-200/50">
+                <div id="progress-bar" class="h-full bg-concrete-800 transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+            <div class="absolute top-3 right-4 text-xs font-medium text-concrete-400 tracking-wide">
+                <span id="current-step">1</span> / 4
+            </div>
+        </div>
+
+        <!-- Вопросы -->
+        <div class="flex-1 flex items-center justify-center px-5 pt-14 pb-8">
+            <div id="question-container" class="w-full max-w-md">
+
+                <!-- Вопрос 1 -->
+                <div class="question-card animate-fade-in" data-question="0">
+                    <div class="bg-white/80 backdrop-blur-sm rounded-2xl border border-concrete-100 shadow-sm p-6">
+                        <h2 class="text-xl font-bold text-concrete-900 mb-6 leading-snug">
+                            В каком состоянии твоя батарейка прямо сейчас?
+                        </h2>
+                        <div class="space-y-2.5">
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="0">
+                                Разряжена в ноль, не кантовать
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="1">
+                                Держится на 15% и режиме энергосбережения
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="1">
+                                Стабильные 50%, жить можно
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="2">
+                                Заряжен на 100%, готов разносить задачи
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="2">
+                                Кажется, у меня гиперзаряд, я не могу остановиться
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вопрос 2 -->
+                <div class="question-card hidden" data-question="1">
+                    <div class="bg-white/80 backdrop-blur-sm rounded-2xl border border-concrete-100 shadow-sm p-6">
+                        <h2 class="text-xl font-bold text-concrete-900 mb-6 leading-snug">
+                            Что прямо сейчас происходит в твоей голове?
+                        </h2>
+                        <div class="space-y-2.5">
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="0">
+                                Полный экзистенциальный кризис и перекати-поле
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="1">
+                                Бесконечный внутренний монолог и легкая тревожность
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="1">
+                                Фоновые мысли о том, что приготовить на ужин
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="2">
+                                Четкий пошаговый план по захвату этого мира
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="2">
+                                Абсолютный дзен, я созерцаю этот мир
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вопрос 3 -->
+                <div class="question-card hidden" data-question="2">
+                    <div class="bg-white/80 backdrop-blur-sm rounded-2xl border border-concrete-100 shadow-sm p-6">
+                        <h2 class="text-xl font-bold text-concrete-900 mb-6 leading-snug">
+                            Какая музыка идеально описала бы твой сегодняшний день?
+                        </h2>
+                        <div class="space-y-2.5">
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="0">
+                                Грустный депрессивный рок или глухая тишина
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="1">
+                                Расслабленный лоу-фай или меланхоличный поп
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="1">
+                                Популярные треки из чартов на повторе
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="2">
+                                Бодрый хип-хоп или динамичный электро-поп
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="2">
+                                Разрывающий колонки фонк или тяжелый метал
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вопрос 4 -->
+                <div class="question-card hidden" data-question="3">
+                    <div class="bg-white/80 backdrop-blur-sm rounded-2xl border border-concrete-100 shadow-sm p-6">
+                        <h2 class="text-xl font-bold text-concrete-900 mb-6 leading-snug">
+                            Твой главный план на этот вечер?
+                        </h2>
+                        <div class="space-y-2.5">
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="0">
+                                Лечь лицом в подушку и доползти до кровати
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="1">
+                                Листать Reels/TikTok, пока телефон не упадет на лицо
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="1">
+                                Посмотреть сериал под вкусную еду
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="2">
+                                Встретиться с друзьями или устроить прогулку по городу
+                            </button>
+                            <button class="answer-btn w-full text-left py-4 px-5 bg-concrete-50 hover:bg-concrete-100 rounded-xl transition-all duration-300 text-concrete-700 font-medium text-sm" data-score="2">
+                                Покодить пет-проект или поучить английский
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ЭКРАН 2: РЕЗУЛЬТАТ — ВАЙБ ДНЯ               -->
+    <!-- ============================================ -->
+    <div id="result-screen" class="hidden min-h-screen flex flex-col px-4 py-6 overflow-y-auto">
+
+        <!-- Заголовок -->
+        <div class="text-center pt-4 pb-2 animate-fade-in">
+            <h1 id="result-header" class="text-3xl font-bold tracking-tight mb-1">
+                ВАЙБ ДНЯ <span class="inline-block">☕️</span><span class="inline-block">✨</span>
+            </h1>
+        </div>
+
+        <!-- Фото кофе -->
+        <div class="relative mx-auto w-full max-w-xs mt-4 mb-6 animate-slide-up" style="animation-delay: 0.1s;">
+            <div id="result-image-wrapper" class="rounded-3xl overflow-hidden shadow-lg">
+                <img id="result-image" src="" alt="Ваш кофе" class="w-full h-72 object-cover">
+            </div>
+            <!-- Бейдж с эмодзи -->
+            <div id="result-emoji-badge" class="emoji-badge absolute -top-2 -right-2 w-14 h-14 rounded-full flex items-center justify-center border-2 border-white">
+                <span id="result-emoji" class="text-2xl"></span>
+            </div>
+            <!-- Пар над фото -->
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2 flex gap-2 opacity-40">
+                <span class="text-lg" style="animation: float 2s ease-in-out infinite;">~</span>
+                <span class="text-lg" style="animation: float 2s ease-in-out infinite 0.3s;">~</span>
+                <span class="text-lg" style="animation: float 2s ease-in-out infinite 0.6s;">~</span>
+            </div>
+        </div>
+
+        <!-- Блок результата -->
+        <div id="result-card" class="w-full max-w-sm mx-auto animate-slide-up" style="animation-delay: 0.2s;">
+            <div id="result-card-inner" class="rounded-3xl p-6 backdrop-blur-sm border border-white/20">
+
+                <!-- Заголовок результата -->
+                <div class="text-center mb-6">
+                    <p class="text-xs font-medium tracking-widest uppercase opacity-60 mb-2"></p>
+                    <h2 id="result-title" class="text-2xl font-bold leading-tight"></h2>
+                </div>
+
+                <!-- Детализация: Настроение -->
+                <div id="mood-block" class="flex items-start gap-3 mb-4 p-4 rounded-2xl bg-white/10">
+                    <span id="mood-icon" class="text-xl mt-0.5"></span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-medium tracking-wide uppercase opacity-50 mb-0.5">Твоё Настроение</p>
+                        <p class="font-semibold">
+                            <span id="mood-emoji" class="mr-1"></span>
+                            <span id="mood-name"></span>
+                            <span id="mood-sub" class="text-sm font-normal opacity-60 ml-1"></span>
+                        </p>
+                    </div>
+                    <span id="mood-emoji-right" class="text-lg opacity-70"></span>
+                </div>
+
+                <!-- Детализация: Стиль -->
+                <div id="style-block" class="flex items-start gap-3 mb-4 p-4 rounded-2xl bg-white/10">
+                    <span id="style-icon" class="text-xl mt-0.5"></span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-medium tracking-wide uppercase opacity-50 mb-0.5">Твой Стиль</p>
+                        <p class="font-semibold">
+                            <span id="style-emoji" class="mr-1"></span>
+                            <span id="style-name"></span>
+                            <span id="style-sub" class="text-sm font-normal opacity-60 ml-1"></span>
+                        </p>
+                    </div>
+                    <span id="style-emoji-right" class="text-lg opacity-70"></span>
+                </div>
+
+                <!-- Детализация: Состояние -->
+                <div id="state-block" class="flex items-start gap-3 p-4 rounded-2xl bg-white/10">
+                    <span id="state-icon" class="text-xl mt-0.5"></span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-medium tracking-wide uppercase opacity-50 mb-0.5">Твоё Состояние</p>
+                        <p class="font-semibold">
+                            <span id="state-emoji" class="mr-1"></span>
+                            <span id="state-name"></span>
+                            <span id="state-sub" class="text-sm font-normal opacity-60 ml-1"></span>
+                        </p>
+                    </div>
+                    <span id="state-emoji-right" class="text-lg opacity-70"></span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Нижний блок: название кофейни и оффер -->
+        <div class="w-full max-w-sm mx-auto mt-6 text-center animate-slide-up" style="animation-delay: 0.3s;">
+            <p id="coffee-shop-name" class="text-sm font-semibold tracking-wide mb-1"></p>
+            <p class="text-xs opacity-60 flex items-center justify-center gap-1">
+                <span class="inline-block">✓</span>
+                Скидка 20% по промокоду при покупке
+            </p>
+        </div>
+
+        <!-- Кнопка CTA -->
+        <div class="w-full max-w-sm mx-auto mt-6 pb-6 animate-slide-up" style="animation-delay: 0.4s;">
+            <button id="cta-button"
+                    class="w-full py-4 px-6 bg-white/90 text-concrete-900 font-semibold text-sm rounded-2xl btn-start shadow-lg active:scale-97 backdrop-blur-sm">
+                Забрать скидку 20% и подписаться
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- СКРИПТ                                       -->
+    <!-- ============================================ -->
+    <script>
+        const state = {
+            currentQuestion: 0,
+            totalScore: 0,
+            answers: [],
+            promoCode: '',
+            socialLink: ''
+        };
+
+        const QUESTIONS_COUNT = 4;
+
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const questScreen = document.getElementById('quest-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const progressBar = document.getElementById('progress-bar');
+        const currentStepEl = document.getElementById('current-step');
+        const ctaButton = document.getElementById('cta-button');
+        const btnStart = document.getElementById('btn-start');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchSocialLink();
+            setupAnswerButtons();
+
+            // Кнопка старта -> переход к квесту
+            btnStart.addEventListener('click', () => {
+                welcomeScreen.classList.add('hidden');
+                questScreen.classList.remove('hidden');
+            });
+        });
+
+        async function fetchSocialLink() {
+            try {
+                const response = await fetch('/api/social-link');
+                const data = await response.json();
+                state.socialLink = data.url;
+            } catch (e) {
+                state.socialLink = '#';
+            }
+        }
+
+        function setupAnswerButtons() {
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.addEventListener('click', handleAnswer);
+            });
+        }
+
+        function handleAnswer(event) {
+            const btn = event.currentTarget;
+            state.totalScore += parseInt(btn.dataset.score);
+            state.answers.push(parseInt(btn.dataset.score));
+
+            if (state.currentQuestion < QUESTIONS_COUNT - 1) {
+                goToNextQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function goToNextQuestion() {
+            const currentCard = document.querySelector(`[data-question="${state.currentQuestion}"]`);
+            currentCard.classList.add('animate-fade-out');
+
+            setTimeout(() => {
+                currentCard.classList.add('hidden');
+                currentCard.classList.remove('animate-fade-out');
+                state.currentQuestion++;
+
+                const nextCard = document.querySelector(`[data-question="${state.currentQuestion}"]`);
+                nextCard.classList.remove('hidden');
+                nextCard.classList.add('animate-fade-in');
+
+                updateProgress();
+            }, 300);
+        }
+
+        function updateProgress() {
+            const progress = ((state.currentQuestion + 1) / QUESTIONS_COUNT) * 100;
+            progressBar.style.width = `${progress}%`;
+            currentStepEl.textContent = state.currentQuestion + 1;
+        }
+
+        async function finishQuiz() {
+            try {
+                ctaButton.textContent = 'Генерируем ваш результат...';
+                ctaButton.disabled = true;
+
+                const response = await fetch('/api/generate-vibe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ score: state.totalScore })
+                });
+
+                if (!response.ok) throw new Error('Ошибка сервера');
+
+                const result = await response.json();
+                state.promoCode = result.promo_code;
+                showResult(result);
+            } catch (e) {
+                alert('Произошла ошибка. Попробуйте еще раз.');
+                location.reload();
+            }
+        }
+
+        function showResult(result) {
+            questScreen.classList.add('hidden');
+
+            // Применяем фоновый градиент
+            resultScreen.className = result.bg_class + ' min-h-screen flex flex-col px-4 py-6 overflow-y-auto';
+
+            // Фото кофе
+            document.getElementById('result-image').src = result.image_url;
+
+            // Бейдж с эмодзи
+            document.getElementById('result-emoji').textContent = result.emoji;
+            document.getElementById('result-emoji-badge').className = 'emoji-badge absolute -top-2 -right-2 w-14 h-14 rounded-full flex items-center justify-center border-2 border-white ' + result.card_bg;
+
+            // Заголовок результата
+            document.getElementById('result-title').textContent = 'ТЫ — ' + result.title + '!';
+            document.getElementById('result-title').className = 'text-2xl font-bold leading-tight ' + result.accent;
+
+            // Настроение
+            document.getElementById('mood-icon').textContent = result.mood.icon;
+            document.getElementById('mood-emoji').textContent = result.mood.emoji;
+            document.getElementById('mood-name').textContent = result.mood.name;
+            document.getElementById('mood-sub').textContent = '| ' + result.mood.sub;
+            document.getElementById('mood-emoji-right').textContent = result.mood.emoji;
+            document.getElementById('mood-block').className = 'flex items-start gap-3 mb-4 p-4 rounded-2xl ' + result.card_bg;
+
+            // Стиль
+            document.getElementById('style-icon').textContent = result.style.icon;
+            document.getElementById('style-emoji').textContent = result.style.emoji;
+            document.getElementById('style-name').textContent = result.style.name;
+            document.getElementById('style-sub').textContent = '| ' + result.style.sub;
+            document.getElementById('style-emoji-right').textContent = result.style.emoji;
+            document.getElementById('style-block').className = 'flex items-start gap-3 mb-4 p-4 rounded-2xl ' + result.card_bg;
+
+            // Состояние
+            document.getElementById('state-icon').textContent = result.state.icon;
+            document.getElementById('state-emoji').textContent = result.state.emoji;
+            document.getElementById('state-name').textContent = result.state.name;
+            document.getElementById('state-sub').textContent = '| ' + result.state.sub;
+            document.getElementById('state-emoji-right').textContent = result.state.emoji;
+            document.getElementById('state-block').className = 'flex items-start gap-3 p-4 rounded-2xl ' + result.card_bg;
+
+            // Название кофейни
+            document.getElementById('coffee-shop-name').textContent = result.coffee_shop_name;
+
+            resultScreen.classList.remove('hidden');
+            ctaButton.addEventListener('click', handleCtaClick);
+        }
+
+        function handleCtaClick() {
+            if (state.socialLink && state.socialLink !== '#') {
+                window.open(state.socialLink, '_blank');
+            }
+            ctaButton.textContent = `Твой промокод: ${state.promoCode} (Покажи бариста)`;
+            ctaButton.disabled = true;
+            ctaButton.classList.remove('hover:bg-slate-50', 'active:scale-97');
+            ctaButton.classList.add('opacity-70', 'cursor-not-allowed');
+            ctaButton.removeEventListener('click', handleCtaClick);
+        }
+    </script>
+</body>
+</html>

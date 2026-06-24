@@ -1,0 +1,33 @@
+# Конфигурация сборки для Amvera Cloud
+# Документация: https://docs.amvera.dev/
+
+# Тип приложения: контейнер
+type: container
+
+# Настройки сборки Docker
+build:
+  # Используем официальный образ Python
+  base_image: python:3.11-slim
+
+  # Рабочая директория в контейнере
+  workdir: /app
+
+  # Команды сборки
+  commands:
+    # Устанавливаем зависимости
+    - pip install --no-cache-dir -r requirements.txt
+
+    # Копируем файлы проекта
+    - COPY . .
+
+  # Порт, на котором слушает приложение
+  port: 8000
+
+# Переменные окружения (опционально)
+env:
+  - name: PYTHONUNBUFFERED
+    value: "1"
+
+# Команда запуска приложения
+run:
+  command: python main.py
